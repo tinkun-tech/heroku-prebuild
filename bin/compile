@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # bin/compile <build-dir> <cache-dir> <env-dir>
 
-
+# Install aws cli
+set -euo pipefail
 
 BUILD_DIR=$1
 CACHE_DIR=$2
@@ -9,8 +10,58 @@ ENV_DIR=$3
 
 export BUILD_DIR CACHE_DIR ENV_DIR
 
-echo "ENV DIR: $ENV_DIR"
+function indent() {
+  c='s/^/       /'
+  case $(uname) in
+    Darwin) sed -l "$c";;
+    *)      sed -u "$c";;
+  esac
+}
 
+AWS_CLI_URL="https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+
+BUILD_DIR=$1
+BUILDPACK_DIR="$(dirname $(dirname $0))"
+INSTALL_DIR="/app/.awscli"
+TMP_DIR=$(mktemp -d)
+
+echo "-----> Downloading AWS CLI"
+curl --silent --show-error --fail -o "${TMP_DIR}/awscliv2.zip" "${AWS_CLI_URL}" |& indent
+unzip -qq -d "${TMP_DIR}" "${TMP_DIR}/awscliv2.zip" |& indent
+
+echo "-----> Installing AWS CLI"
+mkdir -p "${BUILD_DIR}/.awscli"
+
+# The AWS installer creates symlinks that use absolute paths, as such the install
+# location must match the location from which the CLI is eventually run.
+# At runtime the app will be run from /app, however at build time $BUILD_DIR is
+# typically a path under /tmp (unless a Heroku CI build, in which case it's /app).
+# In order to make all cases work, we have to create a symlink from /app to $BUILD_DIR,
+# so that we can use `/app` paths for the installer, so that the symlinks it creates
+# will use /app paths. A symlink is used instead of file copying to improve build times.
+if [[ "${BUILD_DIR}" != /app ]]; then
+  mkdir -p /app
+  ln -nsf "${BUILD_DIR}/.awscli" "${INSTALL_DIR}"
+fi
+
+"${TMP_DIR}/aws/install" --install-dir "${INSTALL_DIR}/aws-cli" --bin-dir "${INSTALL_DIR}/bin" |& indent
+/app/.awscli/bin/aws --version |& indent
+
+mkdir -p "${BUILD_DIR}/.profile.d"
+cat > "${BUILD_DIR}/.profile.d/awscli.sh" <<'PROFILE'
+export PATH="/app/.awscli/bin:${PATH}"
+PROFILE
+
+cat > "${BUILDPACK_DIR}/export" <<'EXPORT'
+export PATH="/app/.awscli/bin:${PATH}"
+EXPORT
+
+rm -rf "${TMP_DIR}"
+
+echo "-----> Successfully installed AWS CLI"
+
+# Get env vars
+echo "-----> Config env vars"
 export_env_dir() {
   acceptlist_regex=${2:-''}
   denylist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
@@ -22,7 +73,24 @@ export_env_dir() {
     done
   fi
 }
-
 export_env_dir
 
-echo "$AWS_ACCESS_KEY_ID"
+# config AWS
+
+mkdir -p ~/.aws
+
+echo "[default]" > ~/.aws/credentials
+echo "aws_access_key_id = $AWS_ACCESS_KEY_ID" >> ~/.aws/credentials
+echo "aws_secret_access_key = $AWS_SECRET_ACCESS_KEY" >> ~/.aws/credentials
+
+echo "[default]" > ~/.aws/config
+echo "region = $AWS_REGION" >> ~/.aws/config
+echo "output = json" >> ~/.aws/config
+
+# Login aws codeartifact
+
+aws codeartifact login --tool pip --repository $REPOSITORY_NAME --domain $REPOSITORY_DOMAIN --domain-owner $DOMAIN_OWNER --region $AWS_REGION
+
+# Config pip
+pip config set global.extra-index-url https://pypi.org/simple
+pip config set global.trusted-host pypi.org
