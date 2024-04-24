@@ -57,11 +57,9 @@ echo "-----> Successfully installed AWS CLI"
 # Get aws env vars
 export_env_dir() {
   env_dir=$1
-  acceptlist_regex=${2:-''}
-  denylist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
   if [ -d "$env_dir" ]; then
     for e in $(ls $env_dir); do
-      echo "$e" | grep -E "$acceptlist_regex" | grep -qvE "$denylist_regex" &&
+      echo "$e" &&
       export "$e=$(cat $env_dir/$e)"
       :
     done
@@ -71,12 +69,6 @@ export_env_dir() {
 
 echo "-----> Config env vars"
 echo "$AWS_ACCESS_KEY_ID"
-AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID"
-AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY"
-AWS_REGION="$AWS_REGION"
-DOMAIN_OWNER="$DOMAIN_OWNER"
-REPOSITORY_DOMAIN="$REPOSITORY_DOMAIN"
-REPOSITORY_NAME="$REPOSITORY_NAME"
 
 # config AWS
 
