@@ -66,6 +66,7 @@ export_env_dir() {
   fi
 }
 
+export_env_dir()
 
 echo "-----> Config env vars"
 echo "$AWS_ACCESS_KEY_ID"
