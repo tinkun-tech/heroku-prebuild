@@ -54,7 +54,17 @@ rm -rf "${TMP_DIR}"
 
 echo "-----> Successfully installed AWS CLI"
 
-# config AWS 
+# Get aws env vars
+echo "-----> Config env vars"
+AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID"
+AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY"
+AWS_REGION="$AWS_REGION"
+DOMAIN_OWNER="$DOMAIN_OWNER"
+REPOSITORY_DOMAIN="$REPOSITORY_DOMAIN"
+REPOSITORY_NAME="$REPOSITORY_NAME"
+
+# config AWS
+
 mkdir -p ~/.aws
 
 echo "[default]" > ~/.aws/credentials
