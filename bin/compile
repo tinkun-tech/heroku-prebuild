@@ -48,4 +48,4 @@ CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain $REP
 
 echo "index-url=https://aws:$CODEARTIFACT_AUTH_TOKEN@$REPOSITORY_DOMAIN-$DOMAIN_OWNER.d.codeartifact.$AWS_DEFAULT_REGION.amazonaws.com/pypi/$REPOSITORY_NAME/simple/" >> ~/.pip/pip.conf
 
-echo "pip config ---> $(~/.pip/pip.conf)"
+echo "pip config ---> $(cat ~/.pip/pip.conf)"
