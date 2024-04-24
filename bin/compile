@@ -9,4 +9,4 @@ ENV_DIR=$3
 
 export BUILD_DIR CACHE_DIR ENV_DIR
 
-echo "$ENV_DIR"
+echo "ENV DIR: $ENV_DIR"
