@@ -77,6 +77,7 @@ export_env_dir
 
 # config AWS
 
+echo "-----> Config AWS"
 mkdir -p ~/.aws
 
 echo "[default]" > ~/.aws/credentials
@@ -88,6 +89,8 @@ echo "region = $AWS_REGION" >> ~/.aws/config
 echo "output = json" >> ~/.aws/config
 
 # Login aws codeartifact
+
+echo "-----> Login codeartifact"
 
 aws codeartifact login --tool pip --repository $REPOSITORY_NAME --domain $REPOSITORY_DOMAIN --domain-owner $DOMAIN_OWNER --region $AWS_REGION
 
