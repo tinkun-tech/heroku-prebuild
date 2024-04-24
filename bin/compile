@@ -41,6 +41,11 @@ echo "output = json" >> ~/.aws/config
 # Login aws codeartifact
 
 echo "-----> Login codeartifact"
-echo "$(aws --version)"
+mkdir -p ~/.pip
+echo "[global]" > ~/.pip/pip.conf
 
-aws codeartifact login --tool pip --repository $REPOSITORY_NAME --domain $REPOSITORY_DOMAIN --domain-owner $DOMAIN_OWNER --region $AWS_DEFAULT_REGION
+
+CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain $REPOSITORY_DOMAIN --domain-owner $DOMAIN_OWNER --region $AWS_DEFAULT_REGION --query authorizationToken --output text)
+
+echo "index-url=https://aws:$CODEARTIFACT_AUTH_TOKEN@$REPOSITORY_DOMAIN-$DOMAIN_OWNER.d.codeartifact.$AWS_DEFAULT_REGION.amazonaws.com/pypi/$REPOSITORY_NAME/simple/" >> ~/.pip/pip.conf
+
