@@ -91,6 +91,7 @@ echo "output = json" >> ~/.aws/config
 # Login aws codeartifact
 
 echo "-----> Login codeartifact"
+echo "$(aws --version)"
 
 aws codeartifact login --tool pip --repository $REPOSITORY_NAME --domain $REPOSITORY_DOMAIN --domain-owner $DOMAIN_OWNER --region $AWS_REGION
 
