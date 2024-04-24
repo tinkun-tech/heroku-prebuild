@@ -1,6 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-cat << EOF
----
-  - tinkun-prebuild
-EOF
+echo "---"
+exit 0
