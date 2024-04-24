@@ -24,3 +24,5 @@ export_env_dir() {
 }
 
 export_env_dir
+
+echo "$AWS_ACCESS_KEY_ID"
